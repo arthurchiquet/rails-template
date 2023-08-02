@@ -7,8 +7,6 @@ inject_into_file "Gemfile", before: "group :development, :test do" do
     gem "devise"
     gem "autoprefixer-rails"
     gem "font-awesome-sass", "~> 6.1"
-    gem "simple_form-tailwind", github: "tarellel/simple_form-tailwind"
-
   RUBY
 end
 
@@ -80,7 +78,6 @@ after_bundle do
   # Generators: db + simple form + pages controller
   ########################################
   rails_command "db:drop db:create db:migrate"
-  generate("simple_form:tailwind:install")
   generate(:controller, "pages", "home", "--skip-routes", "--no-test-framework")
 
   # Routes
