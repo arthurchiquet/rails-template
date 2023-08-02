@@ -154,24 +154,6 @@ after_bundle do
   environment 'config.action_mailer.default_url_options = { host: "http://localhost:3000" }', env: "development"
   environment 'config.action_mailer.default_url_options = { host: "http://TODO_PUT_YOUR_DOMAIN_HERE" }', env: "production"
 
-  # Popper
-  ########################################
-  append_file "config/importmap.rb", <<~RUBY
-    pin "@popperjs/core", to: "popper.js", preload: true
-  RUBY
-
-  append_file "config/initializers/assets.rb", <<~RUBY
-    Rails.application.config.assets.precompile += %w(popper.js)
-  RUBY
-
-  append_file "app/javascript/application.js", <<~JS
-    import "@popperjs/core"
-  JS
-
-  append_file "app/assets/config/manifest.js", <<~JS
-    //= link popper.js
-  JS
-
   # Heroku
   ########################################
   run "bundle lock --add-platform x86_64-linux"
