@@ -26,7 +26,6 @@ run "mv app/assets/rails-stylesheets-master app/assets/stylesheets"
 
 # Layout
 ########################################
-
 gsub_file(
   "app/views/layouts/application.html.erb",
   '<meta name="viewport" content="width=device-width,initial-scale=1">',
