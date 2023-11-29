@@ -14,8 +14,6 @@ inject_into_file "Gemfile", after: 'gem "debug", platforms: %i[ mri mingw x64_mi
   "\n  gem \"dotenv-rails\""
 end
 
-gsub_file("Gemfile", '# gem "sassc-rails"', 'gem "sassc-rails"')
-
 # Assets
 ########################################
 run "rm -rf app/assets/stylesheets"
@@ -35,20 +33,9 @@ gsub_file(
 # Flashes
 ########################################
 file "app/views/shared/_flashes.html.erb", <<~HTML
-  <% if notice %>
-    <div class="alert alert-info alert-dismissible fade show m-1" role="alert">
-      <%= notice %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-      </button>
-    </div>
-  <% end %>
-  <% if alert %>
-    <div class="alert alert-warning alert-dismissible fade show m-1" role="alert">
-      <%= alert %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-      </button>
-    </div>
-  <% end %>
+HTML
+
+file "app/views/shared/_navbar.html.erb", <<~HTML
 HTML
 
 inject_into_file "app/views/layouts/application.html.erb", after: "<body>" do
