@@ -7,6 +7,24 @@ inject_into_file "Gemfile", before: "group :development, :test do" do
     gem "devise"
     gem "autoprefixer-rails"
     gem "font-awesome-sass", "~> 6.1"
+    gem "cloudinary"
+    gem "pundit"
+    gem "rails_admin", "3.0"
+    gem "sidekiq", "< 7"
+    gem "sidekiq-failures", "~> 1.0"
+    gem 'redis-namespace'
+    gem 'redis-rails'
+    gem 'faker'
+    gem 'pagy'
+    gem 'friendly_id'
+    gem 'acts-as-taggable-on'
+    gem 'stripe'
+    gem "pg_search"
+    gem "geocoder"
+    gem "view_component"
+    gem 'wicked'
+    gem 'rails-i18n', '~> 7.0.0'
+    gem 'devise-i18n'
   RUBY
 end
 
@@ -33,9 +51,72 @@ gsub_file(
 # Flashes
 ########################################
 file "app/views/shared/_flashes.html.erb", <<~HTML
+  <% if notice %>
+  <div class="fixed bottom-24 md:bottom-10 left-1/2 transform -translate-x-1/2 z-50 flex items-center justify-between p-2 leading-normal border border-black" role="alert">
+      <p><%= notice %></p>
+  
+      <svg onclick="return this.parentNode.remove();"
+          class="inline w-4 h-4 fill-current ml-2 hover:opacity-80 cursor-pointer" xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512">
+          <path
+              d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256s256-114.6 256-256S397.4 0 256 0zM256 464c-114.7 0-208-93.31-208-208S141.3 48 256 48s208 93.31 208 208S370.7 464 256 464zM359.5 133.7c-10.11-8.578-25.28-7.297-33.83 2.828L256 218.8L186.3 136.5C177.8 126.4 162.6 125.1 152.5 133.7C142.4 142.2 141.1 157.4 149.7 167.5L224.6 256l-74.88 88.5c-8.562 10.11-7.297 25.27 2.828 33.83C157 382.1 162.5 384 167.1 384c6.812 0 13.59-2.891 18.34-8.5L256 293.2l69.67 82.34C330.4 381.1 337.2 384 344 384c5.469 0 10.98-1.859 15.48-5.672c10.12-8.562 11.39-23.72 2.828-33.83L287.4 256l74.88-88.5C370.9 157.4 369.6 142.2 359.5 133.7z" />
+      </svg>
+  </div>
+  <% end %>
+  <% if alert %>
+  <div class="fixed bottom-24 md:bottom-10 left-1/2 transform -translate-x-1/2 z-50 flex items-center justify-between p-2 leading-normal border border-black"
+      role="alert">
+      <svg class="w-5 h-5 inline mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clip-rule="evenodd"></path>
+      </svg>
+      <div>
+          <%= alert %>
+      </div>
+  </div>
+  <% end %>
 HTML
 
 file "app/views/shared/_navbar.html.erb", <<~HTML
+  <nav class="h-14 w-full sticky top-0 z-10 text-stone-800 p-4 lg:px-8">
+    <div class="flex grid grid-cols-4 items-center">
+        <div onclick="openNav()" class="cursor-pointer">
+            <i class="fa-solid fa-xl fa-bars"></i>
+        </div>
+        <%= link_to root_path, class:"col-span-2 block cursor-pointaer text-sm lg:text-lg text-center font-bold" do %>
+            <h2>TEMPLATE</h2>
+        <% end %>
+        <div class="flex justify-end items-center font-semibold">
+            <%= link_to "FR", root_path(locale: :fr), class:"block px-2 py-1" %>
+            <%= link_to "EN", root_path(locale: :en),class:"block px-2 py-1" %>
+        </div>
+    </div>
+    <div onclick="exitNav()" id="sideBar"
+            class="fixed top-14 left-0 w-full h-0 overflow-y-hidden duration-500 z-50">
+            <div id="sideNav" class="fixed top-14 left-0 w-full h-0 overflow-y-hidden duration-500 font-light z-50" style="background: url('<%= asset_path('background.jpg') %>'); background-repeat: repeat; background-size: 300px 300px;">
+                <div class="w-full flex flex-col divide-y pt-2">
+                    <%= link_to t(".home"), root_path, class:"hover:bg-stone-900 text-center hover:text-white duration-700" %>
+                    <% if user_signed_in? %>
+                    <%= link_to t(".signout"), destroy_user_session_path, data: {turbo_method: :delete}, class:"hover:bg-stone-900 text-center hover:text-white duration-700" %>
+                    <% else %>
+                    <%= link_to t(".signin"), new_user_session_path, class:"hover:bg-stone-900 text-center hover:text-white duration-700" %>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+</nav>
+<script>
+    function openNav() {
+        document.getElementById("sideBar").classList.toggle("h-full");
+        document.getElementById("sideNav").classList.toggle("h-64");
+    }
+
+    function exitNav() {
+        document.getElementById("sideBar").classList.toggle("h-full");
+        document.getElementById("sideNav").classList.toggle("h-64");
+    }
+</script>
 HTML
 
 inject_into_file "app/views/layouts/application.html.erb", after: "<body>" do
@@ -84,7 +165,10 @@ after_bundle do
   # Devise install + user
   ########################################
   generate("devise:install")
+  generate("active_storage:install")
   generate("devise", "User")
+  generate("geocoder:config")
+  generate("pundit:install")
 
   # Application controller
   ########################################
